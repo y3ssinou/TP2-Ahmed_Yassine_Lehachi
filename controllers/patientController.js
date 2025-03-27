@@ -1,6 +1,7 @@
 "use strict";
 
 const Patient = require("../models/patient");
+const {formatErrorResponse, formatSuccessResponse} = require('../utils/formatErrorResponse')
 
 exports.getPatients = async (req, res, next) => {
     try 
@@ -70,11 +71,9 @@ exports.createPatient = async (req, res, next) => {
 exports.updatePatient = async (req, res, next) => {
     try 
     {
-        const patient = await Patient.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
-        );
+        const idPatient = req.params.id;
+
+        const patient = await Patient.findById(idPatient);
 
         if (!patient) {
             return res.status(404).json(formatErrorResponse(
@@ -85,7 +84,16 @@ exports.updatePatient = async (req, res, next) => {
               ));   
         }
 
-        res.status(200).json(patient);
+        Object.assign(patient, req.body)
+
+        const nouveauPatient = await patient.save();
+    
+        res.status(200).json(formatSuccessResponse(
+          200,
+          "Médecin à été modifié avec succès",
+          nouveauPatient,
+          req.originalUrl
+        ));
     } 
     catch (err) {
         next(err);

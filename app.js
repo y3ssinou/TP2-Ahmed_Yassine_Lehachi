@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 
 const medecinRoutes = require("./routes/medecin");
 const patientRoutes = require("./routes/patient");
+const rendezvousRoutes = require("./routes/rendezvous");
 
 const seed = require("./routes/db");
 
@@ -22,11 +23,12 @@ app.use((req, res, next) =>{
 	res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 	next();
 
-});
+});	
 
 
 app.use(medecinRoutes);
 app.use(patientRoutes);
+app.use(rendezvousRoutes);
 
 app.use(seed);
 
