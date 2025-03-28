@@ -105,33 +105,43 @@ exports.deleteMedecin = async (req, res, next) => {
   
 
 exports.updateMedecin = async (req, res, next) => {
-  try 
-  {
+  try {
     const medecinId = req.params.id;
-
     const medecin = await Medecin.findById(medecinId);
-
+    
     if (!medecin) {
-        return res.status(404).json(formatErrorResponse(
-            404,
-            "Not Found",
-            "Le Médecin n'existe pas",
-            req.originalUrl
-          ));
+      return res.status(404).json(formatErrorResponse(
+        404,
+        "Not Found",
+        "Médecin non trouvé",
+        req.originalUrl
+      ));
     }
 
-    Object.assign(medecin, req.body)
+    const { nom, prenom, telephone, courriel, specialite } = req.body;
+    
+    if (nom != null) 
+      medecin.nom = nom;
+    if (prenom != null) 
+      medecin.prenom = prenom;
+    if (telephone != null) 
+      medecin.telephone = telephone;
+    if (courriel != null) 
+      medecin.courriel = courriel;
+    if (specialite != null)
+      medecin.specialite = specialite;
 
+    await medecin.validate();
     const nouveauMedecin = await medecin.save();
 
     res.status(200).json(formatSuccessResponse(
       200,
-      "Médecin à été modifié avec succès",
+      "Médecin mis à jour avec succès",
       nouveauMedecin,
       req.originalUrl
     ));
-  } 
-  catch (err) {
-      next(err);
+
+  } catch (err) {
+    next(err);
   }
 };

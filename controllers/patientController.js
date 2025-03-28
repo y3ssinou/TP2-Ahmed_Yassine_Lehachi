@@ -71,34 +71,51 @@ exports.createPatient = async (req, res, next) => {
 exports.updatePatient = async (req, res, next) => {
     try 
     {
-        const idPatient = req.params.id;
+      const patientId = req.params.id;
 
-        const patient = await Patient.findById(idPatient);
-
-        if (!patient) {
-            return res.status(404).json(formatErrorResponse(
-                404,
-                "Not Found",
-                "Le patient n'existe pas",
-                req.originalUrl
-              ));   
-        }
-
-        Object.assign(patient, req.body)
-
-        const nouveauPatient = await patient.save();
-    
-        res.status(200).json(formatSuccessResponse(
-          200,
-          "Médecin à été modifié avec succès",
-          nouveauPatient,
+      const patient = await Patient.findById(patientId);
+  
+      if (!patient) {
+        return res.status(404).json(formatErrorResponse(
+          404,
+          "Not Found",
+          "Patient non trouvéé",
           req.originalUrl
         ));
+      }
+  
+      const { nom, prenom, dateNaissance, telephone, courriel, adresse, codePostal } = req.body;
+  
+      if (nom != null) 
+        patient.nom = nom;
+      if (prenom != null) 
+        patient.prenom = prenom;
+      if (dateNaissance != null) 
+        patient.dateNaissance = dateNaissance;
+      if (telephone != null) 
+        patient.telephone = telephone;
+      if (courriel != null) 
+        patient.courriel = courriel;
+      if (adresse != null) 
+        patient.adresse = adresse;
+      if (codePostal != null) 
+        patient.codePostal = codePostal;
+  
+      await patient.validate();
+      const patientajour = await patient.save();
+  
+      res.status(200).json(formatSuccessResponse(
+        200,
+        "Patient mis à jour avec succès",
+        patientajour,
+        req.originalUrl
+      ));
+  
     } 
     catch (err) {
-        next(err);
+      next(err);
     }
-};
+  };
 
 exports.deletePatient = async (req, res, next) => {
     try 
