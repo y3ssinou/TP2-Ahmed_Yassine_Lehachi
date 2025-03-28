@@ -5,10 +5,10 @@ const rendezvousController = require("../controllers/rendezvousController");
 
 const router = express.Router();
 
-router.post("/rendezvous", rendezvousController.createRendezVous);
-router.get("/rendezvous/:id", rendezvousController.getRendezVousById);
-router.get("/rendezvous/medecins/:id", rendezvousController.getRendezVousByMedecin);
-router.get("/rendezvous/patients/:id", rendezvousController.getRendezVousByPatient);
-router.delete("/rendezvous/:id", rendezvousController.deleteRendezVous);
+router.post("/rendezvous", rendezvousController.creeRendezVous);
+router.get("/rendezvous/:id", rendezvousController.getRendezVousavecId);
+router.get("/rendezvous/medecins/:id", rendezvousController.getRendezVousavecMedecin);
+router.get("/rendezvous/patients/:id", rendezvousController.getRendezVousavecPatient);
+router.delete("/rendezvous/:id", rendezvousController.suppRendezVous);
 
 module.exports = router;

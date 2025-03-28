@@ -28,7 +28,7 @@ exports.getMedecins = async (req, res, next) => {
   }
 };
 
-exports.getMedecinById = async (req, res, next) => {
+exports.getMedecinavecId = async (req, res, next) => {
   try 
   {
     const medecinId = req.params.id;
@@ -56,7 +56,7 @@ exports.getMedecinById = async (req, res, next) => {
 };
   
 
-exports.createMedecin = async (req, res, next) => {
+exports.creeMedecin = async (req, res, next) => {
   try 
   {
       const medecin = new Medecin(req.body);
@@ -76,7 +76,7 @@ exports.createMedecin = async (req, res, next) => {
   }
 };
 
-exports.deleteMedecin = async (req, res, next) => {
+exports.suppMedecin = async (req, res, next) => {
   try 
   {
       const medecinId = req.params.id;
@@ -104,7 +104,7 @@ exports.deleteMedecin = async (req, res, next) => {
 };
   
 
-exports.updateMedecin = async (req, res, next) => {
+exports.modifierMedecin = async (req, res, next) => {
   try {
     const medecinId = req.params.id;
     const medecin = await Medecin.findById(medecinId);

@@ -4,7 +4,7 @@ const RendezVous = require("../models/rendezvous");
 const mongoose = require("mongoose");
 const {formatErrorResponse, formatSuccessResponse} = require('../utils/formatErrorResponse')
 
-exports.createRendezVous = async (req, res, next) => {
+exports.creeRendezVous = async (req, res, next) => {
     try 
     {
         const { patientId, medecinId, 
@@ -32,19 +32,8 @@ exports.createRendezVous = async (req, res, next) => {
         
         const conflitsRendezvous = await RendezVous.find({
             medecinId,
-            $or: [
-                { 
-                    debut: { $lt: fin, $gte: debut } 
-                },
-                { 
-                    fin: { $gt: debut, $lte: fin } 
-                },
-                { $and: 
-                    [
-                        { debut: { $lte: debut } },
-                        { fin: { $gte: fin } }
-                    ]
-                }
+            $or: [{ debut:{$lt: fin, $gte: debut}},{ fin:{$gt: debut, $lte: fin}},
+                { $and: [{ debut: { $lte: debut } },{ fin: { $gte: fin } }]}
             ]
         });
         
@@ -82,7 +71,7 @@ exports.createRendezVous = async (req, res, next) => {
     }
 };
 
-exports.getRendezVousById = async (req, res, next) => {
+exports.getRendezVousavecId = async (req, res, next) => {
     try 
     {
         const idRendezVous = req.params.id;
@@ -106,7 +95,7 @@ exports.getRendezVousById = async (req, res, next) => {
     }
 };
 
-exports.getRendezVousByMedecin = async (req, res, next) => {
+exports.getRendezVousavecMedecin = async (req, res, next) => {
     try 
     {
         const { id } = req.params;
@@ -132,7 +121,7 @@ exports.getRendezVousByMedecin = async (req, res, next) => {
     }
 };
 
-exports.getRendezVousByPatient = async (req, res, next) => {
+exports.getRendezVousavecPatient = async (req, res, next) => {
     try 
     {
         const { id } = req.params;
@@ -159,7 +148,7 @@ exports.getRendezVousByPatient = async (req, res, next) => {
     }
 };
 
-exports.deleteRendezVous = async (req, res, next) => {
+exports.suppRendezVous = async (req, res, next) => {
     try 
     {
         const idRendezVous = req.params.id;

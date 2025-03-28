@@ -6,11 +6,11 @@ const patientController = require("../controllers/patientController");
 const router = express.Router();
 
 router.get("/patients", patientController.getPatients);
-router.post("/patients", patientController.createPatient);
-router.get("/patients/:id", patientController.getPatientById);
-router.put("/patients/:id", patientController.updatePatient);
-router.delete("/patients/:id", patientController.deletePatient);
-router.post("/patients/:id/historique", patientController.addHistorique);
-router.delete("/patients/:id/historique/:id_historique", patientController.deleteHistorique);
+router.post("/patients", patientController.creePatient);
+router.get("/patients/:id", patientController.getPatientavecId);
+router.put("/patients/:id", patientController.modifierPatient);
+router.delete("/patients/:id", patientController.suppPatient);
+router.post("/patients/:id/historique", patientController.ajoutHistorique);
+router.delete("/patients/:id/historique/:id_historique", patientController.suppHistorique);
 
 module.exports = router;

@@ -20,7 +20,7 @@ exports.getPatients = async (req, res, next) => {
     }
 };
 
-exports.getPatientById = async (req, res, next) => {
+exports.getPatientavecId = async (req, res, next) => {
     try 
     {
         const patientId = req.params.id;
@@ -47,7 +47,7 @@ exports.getPatientById = async (req, res, next) => {
     }
 };
 
-exports.createPatient = async (req, res, next) => {
+exports.creePatient = async (req, res, next) => {
     try 
     {
         const patient = new Patient(req.body);
@@ -68,7 +68,7 @@ exports.createPatient = async (req, res, next) => {
     }
 };
 
-exports.updatePatient = async (req, res, next) => {
+exports.modifierPatient = async (req, res, next) => {
     try 
     {
       const patientId = req.params.id;
@@ -117,7 +117,7 @@ exports.updatePatient = async (req, res, next) => {
     }
   };
 
-exports.deletePatient = async (req, res, next) => {
+exports.suppPatient = async (req, res, next) => {
     try 
     {
         const patientId = req.params.id;
@@ -139,41 +139,48 @@ exports.deletePatient = async (req, res, next) => {
     }
 };
 
-exports.addHistorique = async (req, res, next) => {
+exports.ajoutHistorique = async (req, res, next) => {
     try 
     {
+
         const { medecinId, information } = req.body;
 
-        const patient = await Patient.findByIdAndUpdate(
-            req.params.id,{
-                $push: { historique: {
-                        medecinId,
-                        information,
-                        created_at: new Date()
-                    }
-                }
-            },
-            { new: true }
-        );
-
+        const patient = await Patient.findById(req.params.id);
         if (!patient) {
-            return res.status(404).json(formatErrorResponse(
-                404,
-                "Not Found",
-                "Le patient n'existe pas",
-                req.originalUrl
-              ));
+            return res.status(404).json({
+                status: "error",
+                message: "Le patient n'existe pas",
+                path: req.originalUrl,
+                timestamp: new Date().toISOString()
+            });
         }
 
-        res.status(201).json(patient);
+        patient.historique.push({
+            medecinId,
+            information,
+            created_at: new Date()
+        });
+
+        await patient.save();
+
+        res.status(201)
+            .set("Location", `/patients/${patient._id}`)
+            .json({
+                status: "success",
+                message: "Historique ajouté avec succès",
+                data: patient,
+                path: req.originalUrl,
+                timestamp: new Date().toISOString()
+            });
     } 
-    catch (err) 
-    {
+    catch (err) {
+        console.error(err);
         next(err);
     }
 };
 
-exports.deleteHistorique = async (req, res, next) => {
+
+exports.suppHistorique = async (req, res, next) => {
     try 
     {
         const patient = await Patient.findByIdAndUpdate(
