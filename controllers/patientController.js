@@ -185,9 +185,7 @@ exports.suppHistorique = async (req, res, next) => {
     {
         const patient = await Patient.findByIdAndUpdate(
             req.params.id,
-            {
-                $pull: { historique: { _id: req.params.id_historique } }
-            },
+            {$pull: { historique: { _id: req.params.id_historique } }},
             { new: true }
         );
         

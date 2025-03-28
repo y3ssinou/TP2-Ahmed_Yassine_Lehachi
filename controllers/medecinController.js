@@ -3,6 +3,18 @@
 const Medecin = require("../models/medecin");
 const {formatErrorResponse, formatSuccessResponse} = require('../utils/formatErrorResponse')
 
+/**
+ * Récupère la liste des médecins avec la possibilité de filtrer par les spécialités.
+ * Renvoie la liste des médecins en réponse JSON avec un statut de type 200.
+ * 
+ * @param {import('express').Request} req - Objet de requête Express contenant un paramètre optionnel "specialite".
+ * @param {import('express').Response} res - Objet de réponse Express utilisé pour envoyer la liste des médecins.
+ * @param {import('express').NextFunction} next - Fonction middleware pour gérer les erreurs.
+ * 
+ * @returns {void} Cette fonction ne retourne rien directement, elle envoie une réponse JSON ou passe une erreur à `next`.
+ * 
+ * @throws {Error} Passe toute erreur à `next` en cas de problème avec la base de données.
+ */
 exports.getMedecins = async (req, res, next) => {
   try 
   {
@@ -28,6 +40,18 @@ exports.getMedecins = async (req, res, next) => {
   }
 };
 
+/**
+ * Récupère un médecin spécifique selon son ID.
+ * Renvoie le médecin en réponse JSON avec un statut de type 200.
+ * 
+ * @param {import('express').Request} req - Objet de requête Express contenant l'ID du médecin dans `req.params.id`.
+ * @param {import('express').Response} res - Objet de réponse Express utilisé pour envoyer le médecin récupéré.
+ * @param {import('express').NextFunction} next - Fonction middleware pour gérer les erreurs.
+ * 
+ * @returns {void} Cette fonction ne retourne rien directement, elle envoie une réponse JSON ou passe une erreur à `next`.
+ * 
+ * @throws {Error} Renvoie une erreur 404 si le médecin n'existe pas (avec l'id), ou passe toute autre erreur à `next` en cas de problème.
+ */
 exports.getMedecinavecId = async (req, res, next) => {
   try 
   {
@@ -55,7 +79,18 @@ exports.getMedecinavecId = async (req, res, next) => {
   }
 };
   
-
+/**
+ * Crée un nouveau médecin avec les données reçues.
+ * Renvoie le médecin créé en réponse JSON avec un statut de type 201.
+ * 
+ * @param {import('express').Request} req - Objet de requête Express contenant les données du médecin dans `req.body`.
+ * @param {import('express').Response} res - Objet de réponse Express utilisé pour envoyer le médecin créé.
+ * @param {import('express').NextFunction} next - Fonction middleware pour gérer les erreurs.
+ * 
+ * @returns {void} Cette fonction ne retourne rien directement, elle envoie une réponse JSON ou passe une erreur à `next`.
+ * 
+ * @throws {Error} Passe toute erreur à `next` en cas de problème lors de la création du médecin.
+ */
 exports.creeMedecin = async (req, res, next) => {
   try 
   {
@@ -76,6 +111,18 @@ exports.creeMedecin = async (req, res, next) => {
   }
 };
 
+/**
+ * Supprime un médecin selon son identifiant.
+ * Renvoie une réponse vide avec un statut 204 si la suppression à été effectué.
+ * 
+ * @param {import('express').Request} req - Objet de requête Express contenant l'ID du médecin dans `req.params.id`.
+ * @param {import('express').Response} res - Objet de réponse Express utilisé pour indiquer le succès de la suppression.
+ * @param {import('express').NextFunction} next - Fonction middleware pour gérer les erreurs.
+ * 
+ * @returns {void} Cette fonction ne retourne rien directement, elle envoie une réponse JSON ou passe une erreur à `next`.
+ * 
+ * @throws {Error} Renvoie une erreur 404 si le médecin n'existe pas, ou passe toute autre erreur à `next` en cas de problème.
+ */
 exports.suppMedecin = async (req, res, next) => {
   try 
   {
@@ -103,7 +150,18 @@ exports.suppMedecin = async (req, res, next) => {
   }
 };
   
-
+/**
+ * Met à jour un médecin qui existe selon son ID.
+ * Renvoie le médecin mis à jour en réponse JSON avec un statut de type 200.
+ * 
+ * @param {import('express').Request} req - Objet de requête Express contenant l'ID du médecin dans `req.params.id` et les nouvelles données dans `req.body`.
+ * @param {import('express').Response} res - Objet de réponse Express utilisé pour envoyer le médecin mis à jour.
+ * @param {import('express').NextFunction} next - Fonction middleware pour gérer les erreurs.
+ * 
+ * @returns {void} Cette fonction ne retourne rien directement, elle envoie une réponse JSON ou passe une erreur à `next`.
+ * 
+ * @throws {Error} Renvoie une erreur 404 si le médecin n'existe pas, ou passe toute autre erreur à `next` en cas de problème.
+ */
 exports.modifierMedecin = async (req, res, next) => {
   try {
     const medecinId = req.params.id;
