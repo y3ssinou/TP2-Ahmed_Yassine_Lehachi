@@ -93,6 +93,82 @@ exports.getRendezVousavecId = async (req, res, next) => {
     }
 };
 
+exports.getRendezVousavecMedecin = async (req, res, next) => {
+    try 
+    {
+        const filtre = { medecinId: req.params.id };
+        
+        const { date } = req.query;
+
+        if (date) {
+
+            const dateMaintenant = new Date(date);
+
+            const prochaineDate = new Date(dateMaintenant);
+
+            prochaineDate.setDate(dateMaintenant.getDate() + 1);
+            
+            filtre.debut = {
+                $gte: dateMaintenant,
+                $lt: prochaineDate
+            };
+        }
+
+        const rdv = await RendezVous.find(filtre);
+        
+        if (!rdv?.length) 
+            return res.status(404).json(
+            formatErrorResponse(
+                404,
+                "Not Found",
+                "Pas de rendez-vous pour le médecin",
+                req.originalUrl
+            )
+        );
+
+        return res.status(200).json(
+            formatSuccessResponse(
+                200,
+                "Récupération de la liste des rendez-vous pour le médecin réussi avec succès",
+                rdv,
+                req.originalUrl
+            )
+        );
+
+    } 
+    catch (err) 
+    { next(err); 
+        
+    }
+};
+
+exports.getRendezVousavecPatient = async (req, res, next) => {
+    try 
+    {
+        const { id } = req.params;
+        const { date } = req.query;
+        
+        let query = { patientId: id };
+        if (date) {
+            const startDate = new Date(date);
+            startDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(date);
+            endDate.setHours(23, 59, 59, 999);
+            
+            query.debut = { $gte: startDate, $lte: endDate };
+        }
+        
+        const rendezVous = await RendezVous.find(query)
+            .populate("medecinId")
+            .sort({ debut: 1 });
+        
+        res.status(200).json(rendezVous);
+    } 
+    catch (err) {
+        next(err);
+    }
+};
+
 exports.suppRendezVous = async (req, res, next) => {
     try 
     {
