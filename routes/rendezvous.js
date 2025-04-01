@@ -1,7 +1,7 @@
 "use strict";
 
 const express = require("express");
-const rendezvousController = require("../controllers/rendezvousController");
+const rendezvousController = require("../controllers/rendezvouscontroller");
 
 const router = express.Router();
 

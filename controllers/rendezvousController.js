@@ -4,6 +4,20 @@ const RendezVous = require("../models/rendezvous");
 const mongoose = require("mongoose");
 const {formatErrorResponse, formatSuccessResponse} = require('../utils/formatErrorResponse')
 
+/**
+ * Crée un nouveau rendez-vous avec les données reçues.
+ * Renvoie le nouveau rendez-vous et la location créé, en réponse JSON avec un statut de type 201.
+ * 
+ * @param {import('express').Request} req - Objet de requête contenant les données du rendez-vous dans `req.body`.
+ * @param {import('express').Response} res - Objet de réponse Express utilisé pour envoyer le rendez-vous créé.
+ * @param {import('express').NextFunction} next - Fonction middleware pour gérer les erreurs.
+ * 
+ * @returns {void} Cette fonction ne retourne rien directement, elle envoie une réponse JSON ou passe une erreur à `next`.
+ * 
+ * @throws {Error} Renvoie une erreur 400 si les données requises (patientId, medecinId, debut, notes) sont manquantes.
+ *                 Renvoie une erreur 409 en cas de conflit de rendez-vous.
+ *                 Renvoie toute autre erreur à `next`.
+ */
 exports.creeRendezVous = async (req, res, next) => {
     try 
     {
@@ -20,11 +34,13 @@ exports.creeRendezVous = async (req, res, next) => {
               ));
         }
         
-        const nDebut = new Date(debut)
-        const fin = new Date(nDebut.getTime() + 30 * 60 * 1000);         
+        const leDebut = new Date(debut)
+        // Utilisation des secondes à la place des minutes, car les minutes ne marchaient pas
+        const fin = new Date(leDebut.getTime() + 30 * 60 * 1000);         
         
         const conflitsRendezvous = await RendezVous.find({
             medecinId,
+            // lt -> lower then, gt -> greater then
             $or: [{ debut:{$lt: fin, $gte: debut}},{ fin:{$gt: debut, $lte: fin}},
                 { $and: [{ debut: { $lte: debut } },{ fin: { $gte: fin } }]}
             ]
@@ -64,6 +80,18 @@ exports.creeRendezVous = async (req, res, next) => {
     }
 };
 
+
+/**
+ * Renvoie le rendez-vous avec son ID en réponse JSON avec un statut de type 200.
+ * 
+ * @param {import('express').Request} req - Objet de requête contenant l'ID du rendez-vous dans `req.params.id`.
+ * @param {import('express').Response} res - Objet de réponse Express utilisé pour envoyer le rendez-vous trouvé.
+ * @param {import('express').NextFunction} next - Fonction middleware pour gérer les erreurs.
+ * 
+ * @returns {void} Cette fonction ne retourne rien directement, elle envoie une réponse JSON ou passe une erreur à `next`.
+ * 
+ * @throws {Error} Renvoie une erreur 404 si le rendez-vous n'existe pas, ou passe toute autre erreur à `next`.
+ */
 exports.getRendezVousavecId = async (req, res, next) => {
     try 
     {
@@ -93,10 +121,22 @@ exports.getRendezVousavecId = async (req, res, next) => {
     }
 };
 
+/**
+ * Renvoie la liste les rendez-vous d'un médecin en fonction de son ID en réponse JSON avec un statut de type 200.
+ * Il filtre les rendez-vous par date si la requête contient le paramètre `date`.
+ * 
+ * @param {import('express').Request} req - Objet de requête contenant l'ID du médecin dans `req.params.id` et une date optionnelle dans `req.query`.
+ * @param {import('express').Response} res - Objet de réponse Express utilisé pour envoyer la liste des rendez-vous.
+ * @param {import('express').NextFunction} next - Fonction middleware pour gérer les erreurs.
+ * 
+ * @returns {void} Cette fonction ne retourne rien directement, elle envoie une réponse JSON ou passe une erreur à `next`.
+ * 
+ * @throws {Error} Renvoie une erreur 404 si aucun rendez-vous n'est trouvé pour le médecin.
+ */
 exports.getRendezVousavecMedecin = async (req, res, next) => {
     try 
     {
-        const filtre = { medecinId: req.params.id };
+        const critereRecherche = { medecinId: req.params.id };
         
         const { date } = req.query;
 
@@ -108,15 +148,15 @@ exports.getRendezVousavecMedecin = async (req, res, next) => {
 
             prochaineDate.setDate(dateMaintenant.getDate() + 1);
             
-            filtre.debut = {
+            critereRecherche.debut = {
                 $gte: dateMaintenant,
                 $lt: prochaineDate
             };
         }
 
-        const rdv = await RendezVous.find(filtre);
+        const rdvDuMedecin = await RendezVous.find(critereRecherche);
         
-        if (!rdv?.length) 
+        if (!rdvDuMedecin?.length) 
             return res.status(404).json(
             formatErrorResponse(
                 404,
@@ -130,7 +170,7 @@ exports.getRendezVousavecMedecin = async (req, res, next) => {
             formatSuccessResponse(
                 200,
                 "Récupération de la liste des rendez-vous pour le médecin réussi avec succès",
-                rdv,
+                rdvDuMedecin,
                 req.originalUrl
             )
         );
@@ -142,33 +182,76 @@ exports.getRendezVousavecMedecin = async (req, res, next) => {
     }
 };
 
+/**
+ * Renvoie la liste les rendez-vous d'un patient en fonction de son ID en réponse JSON avec un statut de type 200.
+ * Il filtre les rendez-vous par date si la requête contient le paramètre `date`.
+ * 
+ * @param {import('express').Request} req - Objet de requête contenant l'ID du patient dans `req.params.id` et une date optionnelle dans `req.query`.
+ * @param {import('express').Response} res - Objet de réponse Express utilisé pour envoyer la liste des rendez-vous.
+ * @param {import('express').NextFunction} next - Fonction middleware pour gérer les erreurs.
+ * 
+ * @returns {void} Cette fonction ne retourne rien directement, elle envoie une réponse JSON ou passe une erreur à `next`.
+ * 
+ * @throws {Error} Renvoie une erreur 404 si aucun rendez-vous n'est trouvé pour le patient.
+ */
 exports.getRendezVousavecPatient = async (req, res, next) => {
     try 
     {
-        const { id } = req.params;
+        const critereRecherche = { patientId: req.params.id };
+        
         const { date } = req.query;
-        
-        let query = { patientId: id };
+
         if (date) {
-            const startDate = new Date(date);
-            startDate.setHours(0, 0, 0, 0);
-            const endDate = new Date(date);
-            endDate.setHours(23, 59, 59, 999);
+
+            const dateMaintenant = new Date(date);
+
+            const prochaineDate = new Date(dateMaintenant);
+
+            prochaineDate.setDate(dateMaintenant.getDate() + 1);
             
-            query.debut = { $gte: startDate, $lte: endDate };
+            critereRecherche.debut = {
+                $gte: dateMaintenant,
+                $lt: prochaineDate
+            };
         }
+
+        const rdvDuPatient = await RendezVous.find(critereRecherche);
         
-        const rendezVous = await RendezVous.find(query)
-            .populate("medecinId")
-            .sort({ debut: 1 });
+        if (!rdvDuPatient?.length) 
+            return res.status(404).json(
+            formatErrorResponse(
+                404,
+                "Not Found",
+                "Pas de rendez-vous pour le patient",
+                req.originalUrl
+            )
+        );
         
-        res.status(200).json(rendezVous);
+        return res.status(200).json(
+            formatSuccessResponse(
+                200,
+                "Récupération de la liste des rendez-vous pour le patient réussi avec succès",
+                rdvDuPatient,
+                req.originalUrl
+            )
+        );
     } 
     catch (err) {
         next(err);
     }
 };
 
+/**
+ * Supprime un rendez-vous en fonction de son ID et renvoie le rendez-vous en réponse JSON avec un statut de type 204.
+ * 
+ * @param {import('express').Request} req - Objet de requête contenant l'ID du rendez-vous à supprimer dans `req.params.id`.
+ * @param {import('express').Response} res - Objet de réponse Express utilisé pour envoyer la liste des rendez-vous.
+ * @param {import('express').NextFunction} next - Fonction middleware pour gérer les erreurs.
+ * 
+ * @returns {void} Cette fonction ne retourne rien directement, elle envoie une réponse JSON ou passe une erreur à `next`.
+ * 
+ * @throws {Error} Renvoie une erreur 404 si le rendez-vous n'existe pas, ou passe toute autre erreur à `next`.
+ */
 exports.suppRendezVous = async (req, res, next) => {
     try 
     {
@@ -184,7 +267,15 @@ exports.suppRendezVous = async (req, res, next) => {
                 req.originalUrl
               ));
         }
-        res.status(204).send();
+
+        return res.status(204).json(
+            formatSuccessResponse(
+                204,
+                "Suppression du rendez-vous réussi avec succès",
+                rendezVous,
+                req.originalUrl
+            )
+        );
     } 
     catch (err) {
         next(err);

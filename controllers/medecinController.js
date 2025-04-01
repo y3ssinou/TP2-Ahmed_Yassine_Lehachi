@@ -81,7 +81,7 @@ exports.getMedecinavecId = async (req, res, next) => {
   
 /**
  * Crée un nouveau médecin avec les données reçues.
- * Renvoie le médecin créé en réponse JSON avec un statut de type 201.
+ * Renvoie le nouveau Médecin créé en réponse JSON avec un statut de type 201.
  * 
  * @param {import('express').Request} req - Objet de requête Express contenant les données du médecin dans `req.body`.
  * @param {import('express').Response} res - Objet de réponse Express utilisé pour envoyer le médecin créé.
